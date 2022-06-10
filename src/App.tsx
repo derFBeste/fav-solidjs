@@ -1,4 +1,11 @@
-import { Component, createResource, createSignal, Show } from "solid-js";
+import {
+  Component,
+  createResource,
+  createSignal,
+  For,
+  Index,
+  Show,
+} from "solid-js";
 import "tachyons";
 import styles from "./App.module.css";
 
@@ -11,34 +18,35 @@ type UserFavorite = {
   musicGenre: string;
   song: string;
   book: string;
-  // word: string;
   color: string;
   movie: string;
   drink: string;
   food: string;
   number: number;
   superHero: string;
-  // quote: string;
 };
 
 const url = "http://localhost:9001";
-const recordCount = 1000;
-// const userFavorites = [];
 
-// FOCUS:
-// 1. add call to backend
-// 2. display results
+const {
+  location: { search },
+} = window;
+
+console.log(search);
+
+const recordCount = search ? search.split("=")[1] : 1000;
+console.log(recordCount);
 const fetchUserFavorites = async () =>
   (await fetch(`${url}/users?recordCount=${recordCount}`)).json();
 
 const App: Component = () => {
-  // const [userFavorites, setUserFavorites] = createSignal();
+  // const [recordCount, setRecordCount] = createSignal(recordCount);
 
-  // combines a signal with a fetch
+  // combines a signal with a fetching a resource
   const [userFavorites] =
     createResource<Array<UserFavorite>>(fetchUserFavorites);
 
-  // return (userFavorites.loading ? <div>"Loading..."</div> : <div>yo!</div>);
+  const columnNames = () => Object.keys(userFavorites()[0]) || [];
 
   return (
     <>
@@ -49,24 +57,25 @@ const App: Component = () => {
           <table class="f6 w-100" cellSpacing="0">
             <thead>
               <tr>
-                {Object.keys(userFavorites()[0]).map((colName) => (
-                  <th class="fw6 tl pa1 pointer bb black--90">{colName}</th>
-                ))}
+                <Index each={columnNames()}>
+                  {(colName) => (
+                    <th class="fw6 tl pa1 pointer bb black--90">{colName}</th>
+                  )}
+                </Index>
               </tr>
             </thead>
             <tbody>
-              {userFavorites().map((userInfo) => (
-                <tr>
-                  {Object.values(userInfo).map((value) => (
-                    <td
-                      class="pa1 tl bb bl black--90"
-                      key={`${userInfo.id}_${value}`}
-                    >
-                      {value}
-                    </td>
-                  ))}
-                </tr>
-              ))}
+              <For each={userFavorites()}>
+                {(userInfo) => (
+                  <tr>
+                    <Index each={Object.values(userInfo)}>
+                      {(value) => (
+                        <td class="pa1 tl bb bl black--90">{value}</td>
+                      )}
+                    </Index>
+                  </tr>
+                )}
+              </For>
             </tbody>
             <tbody></tbody>
           </table>
