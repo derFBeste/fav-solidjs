@@ -1,5 +1,6 @@
 import {
   Component,
+  createEffect,
   createResource,
   createSignal,
   For,
@@ -7,7 +8,7 @@ import {
   Show,
 } from "solid-js";
 import "tachyons";
-import styles from "./App.module.css";
+import { createClient } from "@supabase/supabase-js";
 
 type UserFavorite = {
   id: string;
@@ -26,27 +27,39 @@ type UserFavorite = {
   superHero: string;
 };
 
-const url = "http://localhost:9001";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const {
   location: { search },
 } = window;
 
-console.log(search);
+const upperLimit = search ? search.split("=")[1] : 1000;
 
-const recordCount = search ? search.split("=")[1] : 1000;
-console.log(recordCount);
-const fetchUserFavorites = async () =>
-  (await fetch(`${url}/users?recordCount=${recordCount}`)).json();
+// const fetchUserFavorites = async () =>
+//   (await fetch(`${url}/users?recordCount=${recordCount}`)).json();
+
+async function getUserInfo() {
+  let { data, error } = await supabase
+    .from("user-favorites")
+    .select(
+      "id, name, email, team, animal, musicGenre, song, book, color, movie, drink, food, number, superHero"
+    )
+    .range(0, Number(upperLimit));
+
+  return data;
+}
+const fetchUserFavorites = async () => await getUserInfo();
 
 const App: Component = () => {
-  // const [recordCount, setRecordCount] = createSignal(recordCount);
-
   // combines a signal with a fetching a resource
   const [userFavorites] =
     createResource<Array<UserFavorite>>(fetchUserFavorites);
 
   const columnNames = () => Object.keys(userFavorites()[0]) || [];
+  const recordCount = () => userFavorites().length || 0;
 
   return (
     <>
@@ -83,6 +96,9 @@ const App: Component = () => {
       </Show>
       <Show when={userFavorites.loading}>
         <div class="ma1">Loading...</div>
+      </Show>
+      <Show when={userFavorites.error}>
+        <div class="ma1">There was an error fetching data.</div>
       </Show>
     </>
   );
