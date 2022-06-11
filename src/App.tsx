@@ -38,9 +38,6 @@ const {
 
 const upperLimit = search ? search.split("=")[1] : 1000;
 
-// const fetchUserFavorites = async () =>
-//   (await fetch(`${url}/users?recordCount=${recordCount}`)).json();
-
 async function getUserInfo() {
   let { data, error } = await supabase
     .from("user-favorites")
@@ -65,7 +62,7 @@ const App: Component = () => {
     <>
       <Show when={userFavorites()}>
         <div class="ma1">
-          <h2 class="mv2">Favorite Things</h2>
+          <h2 class="mv2">Favorite Things: Solid.js</h2>
           <h3 class="mv2">record count: {recordCount}</h3>
           <table class="f6 w-100" cellSpacing="0">
             <thead>
