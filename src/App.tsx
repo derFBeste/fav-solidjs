@@ -1,6 +1,5 @@
 import {
   Component,
-  createEffect,
   createResource,
   createSignal,
   For,
@@ -9,6 +8,7 @@ import {
 } from "solid-js";
 import "tachyons";
 import { createClient } from "@supabase/supabase-js";
+import { matchSorter } from "match-sorter";
 
 type UserFavorite = {
   id: string;
@@ -29,41 +29,69 @@ type UserFavorite = {
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
-
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const {
   location: { search },
 } = window;
 
-const upperLimit = search ? search.split("=")[1] : 1000;
+const defaultRecordCount = 1000;
+// If there is a record count specified in the URL, use that.
+// If not, use the default record count.
+const upperLimit = search ? search.split("=")[1] : defaultRecordCount;
 
 async function getUserInfo() {
-  let { data, error } = await supabase
+  const { data, error } = await supabase
     .from("user-favorites")
     .select(
       "id, name, email, team, animal, musicGenre, song, book, color, movie, drink, food, number, superHero"
     )
-    .range(0, Number(upperLimit));
+    .range(0, Number(upperLimit) - 1);
 
   return data;
 }
 const fetchUserFavorites = async () => await getUserInfo();
 
 const App: Component = () => {
+  const [selectedUser, setSelectedUser] = createSignal<UserFavorite>();
   // combines a signal with a fetching a resource
-  const [userFavorites] =
+  const [userFavorites, { mutate, refetch }] =
     createResource<Array<UserFavorite>>(fetchUserFavorites);
 
   const columnNames = () => Object.keys(userFavorites()[0]) || [];
   const recordCount = () => userFavorites().length || 0;
 
+  function handleFilter(event: any) {
+    const { value } = event.target;
+
+    if (value) {
+      mutate(
+        matchSorter(userFavorites(), value, {
+          keys: columnNames(),
+          threshold: matchSorter.rankings.WORD_STARTS_WITH,
+        })
+      );
+    } else {
+      refetch();
+    }
+  }
+
   return (
     <>
       <Show when={userFavorites()}>
         <div class="ma1">
-          <h2 class="mv2">Favorite Things: Solid.js</h2>
-          <h3 class="mv2">record count: {recordCount}</h3>
+          <div class="flex flex-row justify-between">
+            <div>
+              <h2 class="mv2">Favorite Things: Solid.js</h2>
+              <h3 class="mv2">record count: {recordCount}</h3>
+            </div>
+            <input
+              class="h2"
+              type="text"
+              placeholder="search"
+              onInput={handleFilter}
+            />
+          </div>
           <table class="f6 w-100" cellSpacing="0">
             <thead>
               <tr>
@@ -77,7 +105,10 @@ const App: Component = () => {
             <tbody>
               <For each={userFavorites()}>
                 {(userInfo) => (
-                  <tr>
+                  <tr
+                    class="pointer dim"
+                    onClick={() => setSelectedUser(userInfo)}
+                  >
                     <Index each={Object.values(userInfo)}>
                       {(value) => (
                         <td class="pa1 tl bb bl black--90">{value}</td>
