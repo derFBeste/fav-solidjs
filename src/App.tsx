@@ -107,6 +107,9 @@ const App: Component = () => {
                 {(userInfo) => (
                   <tr
                     class="pointer dim"
+                    classList={{
+                      "bg-lightest-blue": selectedUser()?.id === userInfo.id,
+                    }}
                     onClick={() => setSelectedUser(userInfo)}
                   >
                     <Index each={Object.values(userInfo)}>
