@@ -1,6 +1,6 @@
 # fav-solidjs
 
-A simple SPA to demo of [Solid.js](https://www.solidjs.com/guides/getting-started).
+A simple SPA to demo [Solid.js](https://www.solidjs.com/guides/getting-started).
 
 This app was built to compare Solidjs to React. The React app's repo can be found [here](https://github.com/derFBeste/fav-react).
 
