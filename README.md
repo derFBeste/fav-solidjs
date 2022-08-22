@@ -8,3 +8,15 @@ It was also built to try out [Vercel](https://vercel.com/). Live versions of the
 
 - [Solidjs](https://fav-solidjs.vercel.app/)
 - [React](https://fav-react.vercel.app/)
+
+## scripts
+### running the app locally
+
+`npm run dev`
+
+## tech stack
+- [Solidjs](https://www.solidjs.com/guides/getting-started)
+- [Vercel](https://vercel.com/)
+- [Supabase](https://supabase.com/)
+- [Typescript](https://www.typescriptlang.org/)
+- [Tachyons](https://tachyons.io/)
