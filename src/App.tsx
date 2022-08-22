@@ -60,6 +60,7 @@ const App: Component = () => {
 
   const columnNames = () => Object.keys(userFavorites()[0]) || [];
   const recordCount = () => userFavorites().length || 0;
+  console.log("render");
 
   function handleFilter(event: any) {
     const { value } = event.target;
@@ -121,7 +122,6 @@ const App: Component = () => {
                 )}
               </For>
             </tbody>
-            <tbody></tbody>
           </table>
         </div>
       </Show>
